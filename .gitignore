@@ -7,3 +7,4 @@ test.py
 package-lock.json
 geckodriver.log
 .serverless/
+.env

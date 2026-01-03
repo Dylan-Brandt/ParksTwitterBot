@@ -18,7 +18,7 @@ export async function sendRandomParkTweet() {
     }
     // mediaIds.push(await rwClient.v1.uploadMedia(aerialPhotoBuffer, {mimeType: 'image/jpg', chunkLength: 50000}));
 
-    let cityState = park["plus_code"]["compound_code"].substring(park["plus_code"]["compound_code"].indexOf(" ") + 1);
+    let cityState = city + ", " + state;
     let blurb = park["name"] + "\n"
         + cityState + "\n"
         + (park["rating"] + "/5 stars (" + park["user_ratings_total"] + " ratings)\n")
