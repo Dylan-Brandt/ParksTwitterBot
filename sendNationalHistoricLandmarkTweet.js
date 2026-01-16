@@ -1,9 +1,15 @@
 import { readFileSync } from 'fs';
 
-import { getTwitterClient, getSpecificPark, getPlacePhotoReferences, getPlaceAerialPhotoBuffer, getManyPlacePhotoBuffers } from './index.js';
+import { getTwitterClient, getSpecificPark, getPlacePhotoReferences, getPlaceAerialPhotoBuffer, getManyPlacePhotoBuffers, isRateLimitExceeded } from './index.js';
 
 export async function sendNationalHistoricLandmarkTweet(stateFile) {
     const rwClient = getTwitterClient();
+
+    if(await isRateLimitExceeded(rwClient)) {
+        console.log("Skipping tweet as rate limit is exceeded");
+        return;
+    }
+
     const data = readFileSync(["./wikipedia_data/national_historic_landmarks/", stateFile].join(""));
     const state_parks = JSON.parse(data);
     const keys = Object.keys(state_parks);

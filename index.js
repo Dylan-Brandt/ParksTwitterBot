@@ -1,18 +1,18 @@
-import {TwitterApi} from 'twitter-api-v2';
+import { TwitterApi } from 'twitter-api-v2';
 import fetch from "node-fetch";
 
 import * as keys from './keys/key.js';
 
-export const STATES = ['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Puerto Rico','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming'];
+export const STATES = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'District of Columbia', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Puerto Rico', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'];
 
 async function getCities(state) {
     try {
         let url = "https://countriesnow.space/api/v0.1/countries/state/cities/q?country=United%20States&state=" + state;
-        let response = await fetch(url, {method: "GET"});
+        let response = await fetch(url, { method: "GET" });
         let retVal = state;
-        if(response.ok) {
+        if (response.ok) {
             let responseJSON = await response.json();
-            if(responseJSON["data"].length > 0) {
+            if (responseJSON["data"].length > 0) {
                 retVal = responseJSON["data"]
             }
         }
@@ -30,14 +30,14 @@ export function getRandomState() {
 
 export async function getRandomCity(stateParam = undefined) {
     let state;
-    if(stateParam) {
+    if (stateParam) {
         state = stateParam;
     }
     else {
         state = getRandomState();
     }
     let cities = await getCities(state);
-    if(Array.isArray(cities)) {
+    if (Array.isArray(cities)) {
         return cities[Math.floor(Math.random() * cities.length)];
     }
     else {
@@ -47,18 +47,18 @@ export async function getRandomCity(stateParam = undefined) {
 
 export async function getRandomPark(city, state) {
     let url = "https://maps.googleapis.com/maps/api/place/textsearch/json?key=" + keys.googleAPIKey
-    + "&query=" + city + ", " + state
-    + "&type=park";
-    let response = await fetch(url, {method: "GET"});
-    if(response.ok) {
+        + "&query=" + city + ", " + state
+        + "&type=park";
+    let response = await fetch(url, { method: "GET" });
+    if (response.ok) {
         let parksJSON = await response.json();
         let park;
-        if(parksJSON["status"] == "ZERO_RESULTS") {
+        if (parksJSON["status"] == "ZERO_RESULTS") {
             throw new ReferenceError("No results for place query at " + city + ", " + state);
         }
         do {
             park = parksJSON["results"][Math.floor(Math.random() * parksJSON["results"].length)];
-        } while(!park["photos"]);
+        } while (!park["photos"]);
         return park;
     }
     else {
@@ -68,18 +68,18 @@ export async function getRandomPark(city, state) {
 
 export async function getSpecificPark(query) {
     let url = "https://maps.googleapis.com/maps/api/place/textsearch/json?key=" + keys.googleAPIKey
-    + "&query=" + query;
+        + "&query=" + query;
 
-    let response = await fetch(url, {method: "GET"});
-    if(response.ok) {
+    let response = await fetch(url, { method: "GET" });
+    if (response.ok) {
         let parksJSON = await response.json();
         let park;
-        if(parksJSON["status"] == "ZERO_RESULTS") {
+        if (parksJSON["status"] == "ZERO_RESULTS") {
             throw new ReferenceError("No results for place query " + query);
         }
         do {
             park = parksJSON["results"][Math.floor(Math.random() * parksJSON["results"].length)];
-        } while(!park["photos"]);
+        } while (!park["photos"]);
         return park;
     }
     else {
@@ -90,11 +90,11 @@ export async function getSpecificPark(query) {
 export async function getPlacePhotoReferences(place_id) {
     try {
         let url = "https://maps.googleapis.com/maps/api/place/details/json"
-        + "?key=" + keys.googleAPIKey
-        + "&place_id=" + place_id
-        + "&fields=photos";
-        let response = await fetch(url, {method: "GET"});
-        if(response.ok) {
+            + "?key=" + keys.googleAPIKey
+            + "&place_id=" + place_id
+            + "&fields=photos";
+        let response = await fetch(url, { method: "GET" });
+        if (response.ok) {
             let responseJSON = await response.json();
             return responseJSON["result"]["photos"];
         }
@@ -122,25 +122,25 @@ export async function getPlacePhotoBuffers(photo_references) {
     let randomIndexes = [];
     let numPhotosToFetch;
     let buffers = [];
-    for(let i = 0; i < photo_references.length; i++) {
+    for (let i = 0; i < photo_references.length; i++) {
         randomIndexes.push(i);
     }
     shuffleArray(randomIndexes);
-    if(randomIndexes.length > 4) {
-        numPhotosToFetch = 4;
+    if (randomIndexes.length > 3) {
+        numPhotosToFetch = 3;
     }
     else {
         numPhotosToFetch = randomIndexes.length;
     }
-    
-    for(let i = 0; i < numPhotosToFetch; i++) {
+
+    for (let i = 0; i < numPhotosToFetch; i++) {
         try {
             let url = "https://maps.googleapis.com/maps/api/place/photo?key="
-            + keys.googleAPIKey
-            + "&photo_reference=" + photo_references[randomIndexes[i]]["photo_reference"]
-            + "&maxwidth=1600";
-            let response = await fetch(url, {method: "GET", accept: "image/*"});
-            if(response.ok) {
+                + keys.googleAPIKey
+                + "&photo_reference=" + photo_references[randomIndexes[i]]["photo_reference"]
+                + "&maxwidth=1600";
+            let response = await fetch(url, { method: "GET", accept: "image/*" });
+            if (response.ok) {
                 let responseBlob = await response.blob();
                 let responseArrayBuffer = await responseBlob.arrayBuffer();
                 let responseBuffer = Buffer.from(responseArrayBuffer, 'binary');
@@ -161,20 +161,20 @@ export async function getManyPlacePhotoBuffers(photo_references) {
     let randomIndexes = [];
     let numPhotosToFetch;
     let buffers = [];
-    for(let i = 0; i < photo_references.length; i++) {
+    for (let i = 0; i < photo_references.length; i++) {
         randomIndexes.push(i);
     }
     shuffleArray(randomIndexes);
     numPhotosToFetch = randomIndexes.length;
-    
-    for(let i = 0; i < numPhotosToFetch; i++) {
+
+    for (let i = 0; i < numPhotosToFetch; i++) {
         try {
             let url = "https://maps.googleapis.com/maps/api/place/photo?key="
-            + keys.googleAPIKey
-            + "&photo_reference=" + photo_references[randomIndexes[i]]["photo_reference"]
-            + "&maxwidth=1600";
-            let response = await fetch(url, {method: "GET", accept: "image/*"});
-            if(response.ok) {
+                + keys.googleAPIKey
+                + "&photo_reference=" + photo_references[randomIndexes[i]]["photo_reference"]
+                + "&maxwidth=1600";
+            let response = await fetch(url, { method: "GET", accept: "image/*" });
+            if (response.ok) {
                 let responseBlob = await response.blob();
                 let responseArrayBuffer = await responseBlob.arrayBuffer();
                 let responseBuffer = Buffer.from(responseArrayBuffer, 'binary');
@@ -191,20 +191,20 @@ export async function getManyPlacePhotoBuffers(photo_references) {
     return buffers;
 }
 
-export async function getPlaceAerialPhotoBuffer(maptype, zoom, lat, lng, markers=false) {
+export async function getPlaceAerialPhotoBuffer(maptype, zoom, lat, lng, markers = false) {
     try {
         let coordinates = lat + "," + lng;
         let url = "https://maps.googleapis.com/maps/api/staticmap?key="
-        + keys.googleAPIKey
-        + "&center=" + coordinates
-        + "&size=500x400"
-        + "&maptype=" + maptype
-        + "&zoom=" + zoom + "&scale=2";
-        if(markers) {
-            url = url + "&markers=size:small|"+ coordinates;
+            + keys.googleAPIKey
+            + "&center=" + coordinates
+            + "&size=500x400"
+            + "&maptype=" + maptype
+            + "&zoom=" + zoom + "&scale=2";
+        if (markers) {
+            url = url + "&markers=size:small|" + coordinates;
         }
-        let response = await fetch(url, {method: "GET", accept: "image/*"});
-        if(response.ok) {
+        let response = await fetch(url, { method: "GET", accept: "image/*" });
+        if (response.ok) {
             let responseBlob = await response.blob();
             let responseArrayBuffer = await responseBlob.arrayBuffer();
             let responseBuffer = Buffer.from(responseArrayBuffer, 'binary');
@@ -221,10 +221,10 @@ export async function getPlaceAerialPhotoBuffer(maptype, zoom, lat, lng, markers
 
 export async function getPlaceShareLink(lat, lng, place_id) {
     let url = "https://www.google.com/maps/search/?api=1&query="
-    + lat + "," + lng 
-    + "&query_place_id=" + place_id;
-    
-    let response = await fetch(url, {method: "GET"});
+        + lat + "," + lng
+        + "&query_place_id=" + place_id;
+
+    let response = await fetch(url, { method: "GET" });
     console.log(response);
 }
 
@@ -237,5 +237,31 @@ export function getTwitterClient() {
     });
 
     return userClient.readWrite;
+}
+
+export async function isRateLimitExceeded(client) {
+    try {
+        const userId = process.env.TWITTER_USER_ID;
+
+        const oneDayAgo = new Date();
+        oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+        const startTime = oneDayAgo.toISOString();
+
+        const userTimeline = await client.v2.userTimeline(userId, {
+            start_time: startTime,
+            'tweet.fields': ['created_at', 'text'],
+            max_results: 100
+        });
+
+        console.log("userTimeline: " + JSON.stringify(userTimeline))
+        console.log("result_count: " + userTimeline.meta.result_count)        
+        console.log("result_count type: " + typeof userTimeline.meta.result_count)        
+
+        return userTimeline.meta.result_count >= 19;
+
+    } catch (e) {
+        console.error("Error fetching rate limit", e)
+        return false;
+    }
 }
 

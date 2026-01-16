@@ -1,9 +1,15 @@
 import { readFileSync } from 'fs';
 
-import { getTwitterClient, getSpecificPark, getPlacePhotoReferences, getPlaceAerialPhotoBuffer, getManyPlacePhotoBuffers } from './index.js';
+import { getTwitterClient, getSpecificPark, getPlacePhotoReferences, getPlaceAerialPhotoBuffer, getManyPlacePhotoBuffers, isRateLimitExceeded } from './index.js';
 
 export async function sendNationalProtectedAreaTweet(parkType, area=null) {
     const rwClient = getTwitterClient();
+
+    if(await isRateLimitExceeded(rwClient)) {
+        console.log("Skipping tweet as rate limit is exceeded");
+        return;
+    }
+
     const data = readFileSync(["./wikipedia_data/national_areas/", parkType.replaceAll(" ", "_").toLowerCase(), "s.json"].join(""));
     const areas_json = JSON.parse(data);
     const keys = Object.keys(areas_json);
@@ -64,5 +70,6 @@ export async function sendNationalProtectedAreaTweet(parkType, area=null) {
 
     console.log(leadBlurb);
 
-    await rwClient.v2.tweetThread(tweets);
+    const result = await rwClient.v2.tweetThread(tweets);
+    console.log(result);
 }

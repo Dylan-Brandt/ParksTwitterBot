@@ -1,9 +1,15 @@
 import { readFileSync } from 'fs';
 
-import { getTwitterClient, getSpecificPark, getPlacePhotoReferences, getPlaceAerialPhotoBuffer, getManyPlacePhotoBuffers } from './index.js';
+import { getTwitterClient, getSpecificPark, getPlacePhotoReferences, getPlaceAerialPhotoBuffer, getManyPlacePhotoBuffers, isRateLimitExceeded } from './index.js';
 
 export async function sendStateParkTweet(stateFile) {
     const rwClient = getTwitterClient();
+
+    if(await isRateLimitExceeded(rwClient)) {
+            console.log("Skipping tweet as rate limit is exceeded");
+            return;
+    }
+
     const data = readFileSync(["./wikipedia_data/state_parks/", stateFile].join(""));
     const state_parks = JSON.parse(data);
     const keys = Object.keys(state_parks);
@@ -77,5 +83,6 @@ export async function sendStateParkTweet(stateFile) {
 
     console.log(leadBlurb);
 
-    await rwClient.v2.tweetThread(tweets);
+    const result = await rwClient.v2.tweetThread(tweets);
+    console.log(result);
 }

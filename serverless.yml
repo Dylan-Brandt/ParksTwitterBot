@@ -16,6 +16,7 @@ provider:
     ACCESS_SECRET: ${env:ACCESS_SECRET}
     OAUTH_CLIENT_ID: ${env:OAUTH_CLIENT_ID}
     OAUTH_SECRET: ${env:OAUTH_SECRET}
+    TWITTER_USER_ID: ${env:TWITTER_USER_ID}
 
 functions:
   sendRandomPark:
