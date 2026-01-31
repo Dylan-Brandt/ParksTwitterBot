@@ -17,6 +17,17 @@ provider:
     OAUTH_CLIENT_ID: ${env:OAUTH_CLIENT_ID}
     OAUTH_SECRET: ${env:OAUTH_SECRET}
     TWITTER_USER_ID: ${env:TWITTER_USER_ID}
+  iam:
+    role:
+      name: everydayparks-dev-${self:provider.region}-lambdaRole
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "ssm:GetParameter"
+            - "ssm:GetParametersByPath"
+            - "ssm:PutParameter"
+          Resource:
+            - "arn:aws:ssm:${self:provider.region}:${aws:accountId}:parameter/everydayparks/rateLimitReset"
 
 functions:
   sendRandomPark:

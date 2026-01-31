@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-ssm": "^3.971.0",
     "fs": "^0.0.1-security",
     "node-fetch": "^3.3.1",
     "twitter-api-v2": "^1.15.0"

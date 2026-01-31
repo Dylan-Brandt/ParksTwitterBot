@@ -1,4 +1,5 @@
 import { TwitterApi } from 'twitter-api-v2';
+import { SSMClient, PutParameterCommand, GetParameterCommand } from "@aws-sdk/client-ssm";
 import fetch from "node-fetch";
 
 import * as keys from './keys/key.js';
@@ -239,29 +240,40 @@ export function getTwitterClient() {
     return userClient.readWrite;
 }
 
-export async function isRateLimitExceeded(client) {
+export async function putSSMParam(parameterName, parameterValue) {
+    const client = new SSMClient({ region: "us-east-1" });
+    const input = {
+        Name: parameterName,
+        Value: parameterValue,
+        Type: "String",
+        Overwrite: true
+    };
+
+    const command = new PutParameterCommand(input);
     try {
-        const userId = process.env.TWITTER_USER_ID;
-
-        const oneDayAgo = new Date();
-        oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-        const startTime = oneDayAgo.toISOString();
-
-        const userTimeline = await client.v2.userTimeline(userId, {
-            start_time: startTime,
-            'tweet.fields': ['created_at', 'text'],
-            max_results: 100
-        });
-
-        console.log("userTimeline: " + JSON.stringify(userTimeline))
-        console.log("result_count: " + userTimeline.meta.result_count)        
-        console.log("result_count type: " + typeof userTimeline.meta.result_count)        
-
-        return userTimeline.meta.result_count >= 19;
-
-    } catch (e) {
-        console.error("Error fetching rate limit", e)
-        return false;
+        const data = await client.send(command);
+        console.log("Parameter put successfully. Version:", data.Version);
+    } catch (err) {
+        console.error("Error putting parameter:", err);
     }
 }
 
+export async function getSSMParam(parameterName) {
+    const client = new SSMClient({ region: "us-east-1" });
+    const command = new GetParameterCommand({
+        Name: parameterName,
+        WithDecryption: false,
+    });
+
+    try {
+        const data = await client.send(command);
+        if (data.Parameter && data.Parameter.Value) {
+            return data.Parameter.Value;
+        } else {
+            throw new Error(`Parameter ${parameterName} not found or is empty.`);
+        }
+    } catch (err) {
+        console.error("Error retrieving SSM parameter:", err);
+        return undefined;
+    }
+}
